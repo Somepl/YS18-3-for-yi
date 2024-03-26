@@ -8,7 +8,9 @@
 #include "Wire.h"
 #include "ShiftRegister74HC595.h"
 #include "Wire.h"
-
+#include "HTTPClient.h"
+#include "PubSubClient.h"
+//#include <WiFiClientSecure.h>
 
 #define DataPin 14
 #define LatchPin 32
@@ -30,5 +32,21 @@ extern TaskHandle_t Task3_Handle;
 extern SemaphoreHandle_t touch1Semaphore;
 extern SemaphoreHandle_t touch2Semaphore;
 extern SemaphoreHandle_t touch3Semaphore;
+
+extern SemaphoreHandle_t MutexSemaphore1;
+extern SemaphoreHandle_t MutexSemaphore2;
+extern SemaphoreHandle_t MutexSemaphore3;
+
+
+extern WiFiClient espClient;
+extern PubSubClient client;
+
+
+extern void callback(char* topic, byte* payload, unsigned int length);
+
+
+
+
+
 
 #endif

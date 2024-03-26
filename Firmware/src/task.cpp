@@ -1,6 +1,6 @@
 #include "task.h"
 #include "wificonfig.h"
-
+#include "weather.h"
 
 
 const char* ntpServer = "asia.pool.ntp.org";
@@ -155,7 +155,7 @@ void timeDisplay(void *pvParameters){
   // Serial.print("Temperature=");
   // Serial.print(temperature); 
   // Serial.print('\n');
-
+  client.loop();
   vTaskDelay(1000 / portTICK_PERIOD_MS);
 
   // if(hour==6)
@@ -171,21 +171,30 @@ void Touch1Task(void *pvParameters){  // This is a task.
     //pinMode(2, OUTPUT);
     for (;;){ // A Task shall never return or exit.
     xSemaphoreTake(touch1Semaphore, portMAX_DELAY);
-    // 挂起任务一
+    
+    // 挂起其他任务
     vTaskSuspend(Task0_Handle);
-    // 执行任务二的操作
+    //vTaskSuspend(Task1_Handle);
+   // vTaskSuspend(Task2_Handle);
+    // 执行任务一的操作
+    //xSemaphoreTake(MutexSemaphore1,portMAX_DELAY);  //获取互斥量
+
     unsigned long startTime = millis();
     unsigned long currentTime = millis();
     Serial.println("开始配网");
-    while (currentTime - startTime < 60000)
+    while (currentTime - startTime < 10000)
     {
       bluetooth();
       currentTime = millis();
     }
     Serial.println("配网结束");
-    // 在这里执行任务二的操作，例如某些处理或等待超时等
-    // 恢复任务一
+    
+    //xSemaphoreGive(MutexSemaphore1);                 //释放互斥量
+    // 在这里执行任务一的操作，例如某些处理或等待超时等
+    // 恢复其他任务
     vTaskResume(Task0_Handle);
+    //vTaskResume(Task1_Handle);
+    //vTaskResume(Task2_Handle);
     
   }
 }
@@ -196,9 +205,39 @@ void Touch1Task(void *pvParameters){  // This is a task.
 void Touch2Task(void *pvParameters){  // This is a task.
     //pinMode(2, OUTPUT);
     for (;;){ // A Task shall never return or exit.
-
-    Serial.println("时间");
+    xSemaphoreTake(touch2Semaphore, portMAX_DELAY);
+    // 挂起任务0
+    vTaskSuspend(Task0_Handle);
+    // 执行任务二的操作
+    ParseWeather();
+    Serial.print("今日天气:");
+    Serial.println(Weather);
     //Serial.println(threshold++);
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    vTaskDelay(5000 / portTICK_PERIOD_MS);
+    
+    // 在这里执行任务二的操作，例如某些处理或等待超时等
+    // 恢复任务0
+    vTaskResume(Task0_Handle);
+    }
+}
+
+
+
+
+
+
+void Touch3Task(void *pvParameters){  // This is a task.
+    //pinMode(2, OUTPUT);
+    for (;;){ // A Task shall never return or exit.
+    xSemaphoreTake(touch3Semaphore, portMAX_DELAY);
+    // 挂起任务0
+    vTaskSuspend(Task0_Handle);
+    // 执行任务三的操作
+
+    vTaskDelay(5000 / portTICK_PERIOD_MS);
+    
+    // 在这里执行任务三的操作，例如某些处理或等待超时等
+    // 恢复任务0
+    vTaskResume(Task0_Handle);
     }
 }

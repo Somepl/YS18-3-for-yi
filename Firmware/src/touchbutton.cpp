@@ -1,7 +1,7 @@
 #include "touchbutton.h"
 
-
-
+unsigned long lastDebounceTime1 = 0; // 上一次触发的时间
+unsigned long lastDebounceTime2 = 0; // 上一次触发的时间
 
 
 
@@ -10,9 +10,9 @@ void gotTouch1(){
   unsigned long currentTime = millis();
 
   // 检查当前时间与上次触发时间的差是否大于防抖动时间
-  if (currentTime - lastDebounceTime > DEBOUNCE_TIME) {
+  if (currentTime - lastDebounceTime1 > DEBOUNCE_TIME) {
     // 更新上次触发时间
-    lastDebounceTime = currentTime;
+    lastDebounceTime1 = currentTime;
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     xSemaphoreGiveFromISR(touch1Semaphore, &xHigherPriorityTaskWoken);
     if (xHigherPriorityTaskWoken == pdTRUE) {
@@ -35,6 +35,25 @@ void gotTouch1(){
     //   }
     // }
   
+  }
+
+}
+
+
+
+void gotTouch2(){
+  // 获取当前时间
+  unsigned long currentTime = millis();
+
+  // 检查当前时间与上次触发时间的差是否大于防抖动时间
+  if (currentTime - lastDebounceTime2 > DEBOUNCE_TIME) {
+    // 更新上次触发时间
+    lastDebounceTime2 = currentTime;
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    xSemaphoreGiveFromISR(touch2Semaphore, &xHigherPriorityTaskWoken);
+    if (xHigherPriorityTaskWoken == pdTRUE) {
+      portYIELD_FROM_ISR();
+    }
   }
 
 }
